@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gen Hub</title>
+<meta name="theme-color" content="#07080d">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Gen Hub">
+<style>
+  :root{
+    --bg:#07080d; --panel:#11131c; --panel2:#161926; --line:#232838;
+    --text:#eef3ff; --muted:#8d97ad; --accent:#3df0ff; --accent2:#a97bff;
+    --radius:16px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(1100px 520px at 12% -8%, rgba(61,240,255,.10), transparent 62%),
+      radial-gradient(900px 520px at 92% 4%, rgba(169,123,255,.09), transparent 60%),
+      var(--bg);
+    color:var(--text);
+    font:16px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
+    padding:calc(env(safe-area-inset-top) + 20px) 16px calc(env(safe-area-inset-bottom) + 40px);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:640px;margin:0 auto}
+  header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:18px}
+  .brand{display:flex;align-items:center;gap:11px}
+  .mark{width:38px;height:38px;border-radius:11px;background:linear-gradient(150deg,#3df0ff,#a97bff);display:grid;place-items:center;flex:0 0 auto}
+  .mark svg{width:20px;height:20px}
+  h1{font-size:21px;letter-spacing:-.3px;margin:0;font-weight:650}
+  .sub{color:var(--muted);font-size:12.5px;letter-spacing:.02em}
+  .count{color:var(--muted);font-size:12px;border:1px solid var(--line);background:var(--panel);padding:5px 9px;border-radius:999px;white-space:nowrap}
+  .searchbar{position:sticky;top:calc(env(safe-area-inset-top) + 6px);z-index:20;margin:0 0 20px}
+  input[type=search]{
+    width:100%;appearance:none;border:1px solid var(--line);background:rgba(17,19,28,.92);
+    backdrop-filter:blur(12px);color:var(--text);border-radius:14px;padding:13px 15px;font-size:16px;outline:none;
+  }
+  input[type=search]::placeholder{color:#66708a}
+  input[type=search]:focus{border-color:#33405c;background:rgba(22,25,38,.97)}
+  h2{
+    font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+    margin:26px 0 10px;font-weight:600
+  }
+  h2:first-of-type{margin-top:4px}
+  .grid{display:flex;flex-direction:column;gap:9px}
+  a.card{
+    display:flex;align-items:center;gap:13px;text-decoration:none;color:inherit;
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:13px 14px;transition:background .14s ease,transform .08s ease,border-color .14s ease;
+  }
+  a.card:active{transform:scale(.985);background:var(--panel2)}
+  .ic{
+    width:38px;height:38px;border-radius:11px;flex:0 0 auto;display:grid;place-items:center;
+    font-size:15px;font-weight:700;background:#1b2030;border:1px solid #262d40;color:var(--accent);
+  }
+  .txt{min-width:0;flex:1}
+  .name{font-size:15.5px;font-weight:600;letter-spacing:-.15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .desc{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tag{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#7f8aa3;border:1px solid var(--line);padding:3px 7px;border-radius:7px;flex:0 0 auto}
+  .arrow{color:#4a5468;flex:0 0 auto;font-size:17px}
+  .empty{color:var(--muted);font-size:14px;padding:24px 4px;display:none}
+  .hint{
+    margin-top:26px;border:1px dashed #2b3348;border-radius:14px;padding:13px 14px;
+    color:var(--muted);font-size:12.5px;line-height:1.5;background:rgba(17,19,28,.5)
+  }
+  .hint b{color:#c3ccdd;font-weight:600}
+  .hint.hide{display:none}
+  footer{margin-top:22px;color:#4e576b;font-size:11px;text-align:center;letter-spacing:.03em}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#07080d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h11"/><path d="M11 5l7 7-7 7"/></svg>
+      </div>
+      <div>
+        <h1>Gen Hub</h1>
+        <div class="sub">Every generator, one tap</div>
+      </div>
+    </div>
+    <div class="count" id="count"></div>
+  </header>
+
+  <div class="searchbar">
+    <input id="q" type="search" placeholder="Search generators" autocomplete="off" autocorrect="off" spellcheck="false">
+  </div>
+
+  <div id="lists"></div>
+  <div class="empty" id="empty">Nothing matches that.</div>
+
+  <div class="hint" id="hint">
+    <b>Home screen:</b> iPhone — tap Share, then Add to Home Screen. Android — tap the browser menu, then Install app or Add to Home Screen.
+  </div>
+
+  <footer>Served from GitHub Pages · <span id="stamp"></span></footer>
+</div>
+
+<script>
+const SECTIONS = [
+  {
+    title: "Video generators",
+    items: [
+      { n:"Wan 2.2 Extend", d:"Extend, last-frame chain, face swap", u:"https://simzy-wan22-extend.hf.space", t:"HF" },
+      { n:"Wan 2.2 Templates", d:"Template clips, generate plus extend", u:"https://simzy-wan-2-2-templates.hf.space", t:"HF" },
+      { n:"Wan 2.2 I2V 14B + LoRA", d:"Custom LoRA image to video", u:"https://simzy-wan-2-2-i2v-14b-custom-lora-wow.hf.space", t:"HF" },
+      { n:"Wan 222", d:"ZeroGPU image to video", u:"https://simzy-wan222.hf.space", t:"HF" },
+      { n:"Wan22 Extend Mine", d:"Personal extend build", u:"https://simzy-wan22-extend-mine.hf.space", t:"HF" },
+      { n:"Wan22 Extend Runpod", d:"Extend straight to Runpod", u:"https://simzy-wan22-extend-runpod.hf.space", t:"HF" },
+      { n:"Wan22 10s Extend", d:"Ten second extend on Runpod", u:"https://simzy-wan22-runpod-10s-extend.hf.space", t:"HF" },
+      { n:"Wan 555 I2V", d:"Wan 5.5 image to video", u:"https://huggingface.co/spaces/Simzy/wan555-i2v", t:"HF" }
+    ]
+  },
+  {
+    title: "Face swap",
+    items: [
+      { n:"BFS Best Face Swap", d:"Best face swap, ZeroGPU", u:"https://simzy-bfs-best-face-swap.hf.space", t:"HF" },
+      { n:"BFS Video Studio", d:"Face swap video studio", u:"https://simzy-bfs-video-studio.hf.space", t:"HF" },
+      { n:"Face Swap Runpod", d:"Face swap on Runpod worker", u:"https://simzy-face-swap-runpod.hf.space", t:"HF" },
+      { n:"Face Swap + Extend", d:"Swap then extend the clip", u:"https://simzy-face-swap-extend-video.hf.space", t:"HF" },
+      { n:"MiniMax H3 Character Swap", d:"Character swap with MiniMax", u:"https://simzy-minimax-h3-character-swap.hf.space", t:"HF" }
+    ]
+  },
+  {
+    title: "Apps and sites",
+    items: [
+      { n:"Swapr Casey", d:"Phone UI, Runpod generate", u:"https://swapr-casey.netlify.app", t:"Netlify" },
+      { n:"Swapr", d:"Swapr on Netlify", u:"https://swapr.netlify.app", t:"Netlify" },
+      { n:"Wan Templates", d:"Vercel UI, Runpod run/status", u:"https://wan22-templates.vercel.app", t:"Vercel" },
+      { n:"Wan Templates alt", d:"Second Vercel deployment", u:"https://wan22-templates-alp1.vercel.app", t:"Vercel" },
+      { n:"Swapr Mix", d:"Swapr mix build", u:"https://swapr-mix.vercel.app", t:"Vercel" },
+      { n:"Wan22 Phone Studio", d:"Phone studio build", u:"https://wan22-phone-studio.vercel.app", t:"Vercel" },
+      { n:"Command Center", d:"Your control panel", u:"https://command-center.vercel.app", t:"Vercel" },
+      { n:"AI Agent Relay", d:"Handoff packets between tools", u:"https://ai-agent-relay.vercel.app", t:"Vercel" },
+      { n:"Big Brain Ape Dashboard", d:"Markets, work orders, portfolio", u:"https://simzy420.github.io/big-brain-ape-dashboard/", t:"Pages" },
+      { n:"Wan22 Extend Home", d:"Landing page", u:"https://simzy420.github.io/wan22-extend-home/", t:"Pages" },
+      { n:"Campaign Studio", d:"Paused on Hugging Face", u:"https://simzy-campaign-studio.hf.space", t:"HF" }
+    ]
+  },
+  {
+    title: "Runpod console",
+    items: [
+      { n:"Serverless endpoints", d:"All endpoints and workers", u:"https://www.runpod.io/console/serverless", t:"Console" },
+      { n:"Wan Extend endpoint", d:"kyujeqw2gt779h", u:"https://www.runpod.io/console/serverless/user/endpoint/kyujeqw2gt779h", t:"Console" },
+      { n:"Swapr Wan Animate endpoint", d:"zrmwpir4qzs66s", u:"https://www.runpod.io/console/serverless/user/endpoint/zrmwpir4qzs66s", t:"Console" }
+    ]
+  }
+];
+
+const lists = document.getElementById('lists');
+const q = document.getElementById('q');
+const emptyEl = document.getElementById('empty');
+const countEl = document.getElementById('count');
+
+const allCount = SECTIONS.reduce((n, s) => n + s.items.length, 0);
+countEl.textContent = allCount + ' links';
+
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function render(filter){
+  const f = (filter || '').trim().toLowerCase();
+  lists.innerHTML = '';
+  let shown = 0;
+  SECTIONS.forEach(section => {
+    const items = section.items.filter(it => !f || (it.n + ' ' + it.d + ' ' + it.t).toLowerCase().includes(f));
+    if (!items.length) return;
+    shown += items.length;
+    const h = document.createElement('h2');
+    h.textContent = section.title;
+    lists.appendChild(h);
+    const grid = document.createElement('div');
+    grid.className = 'grid';
+    items.forEach(it => {
+      const a = document.createElement('a');
+      a.className = 'card';
+      a.href = it.u;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.innerHTML =
+        '<div class="ic">' + esc(it.n.charAt(0)) + '</div>' +
+        '<div class="txt"><div class="name">' + esc(it.n) + '</div><div class="desc">' + esc(it.d) + '</div></div>' +
+        '<div class="tag">' + esc(it.t) + '</div><div class="arrow">&rsaquo;</div>';
+      grid.appendChild(a);
+    });
+    lists.appendChild(grid);
+  });
+  emptyEl.style.display = shown ? 'none' : 'block';
+}
+
+q.addEventListener('input', e => render(e.target.value));
+render('');
+
+document.getElementById('stamp').textContent = new Date().toLocaleDateString(undefined, { month:'short', day:'numeric', year:'numeric' });
+
+// Hide the add-to-home hint once running as an installed app
+const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+if (standalone) document.getElementById('hint').classList.add('hide');
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
