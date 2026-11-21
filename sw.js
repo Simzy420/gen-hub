@@ -1,4 +1,4 @@
-const CACHE = 'gen-hub-v2';
+const CACHE = 'gen-hub-v3';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png'];
 
 self.addEventListener('install', e => {
